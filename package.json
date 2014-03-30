@@ -1,0 +1,39 @@
+{
+        "name": "pg-large-object",
+        "version": "0.0.0",
+        "author": "Joris van der Wel <joris@jorisvanderwel.com>",
+        "description": "Large object support for PostgreSQL clients (node-postgres)",
+        "keywords": [
+                "big object",
+                "binary",
+                "database",
+                "file",
+                "pg",
+                "postgres",
+                "stream",
+                "sql"
+        ],
+        "bugs": {
+                "url": "https://github.com/Joris-van-der-Wel/node-pg-large-object/issues"
+        },
+        "license": {
+                "type": "MIT",
+                "url": "https://github.com/Joris-van-der-Wel/node-pg-large-object/blob/master/LICENSE"
+        },
+        "repository": {
+                "type": "git",
+                "url": "git://github.com/Joris-van-der-Wel/node-pg-large-object.git"
+        },
+        
+        "main": "./lib",
+        "dependencies": {
+        },
+        "devDependencies": { 
+                "pg": ">=2.11.1",
+                "nodeunit": ">=0.8.6",
+                "q": "1.0.1"
+        },
+        "scripts": {
+                "test": "nodeunit ./test/index.js"
+        }
+}
