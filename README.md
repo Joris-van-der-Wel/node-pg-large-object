@@ -225,6 +225,7 @@ pg.connect(conString, function(err, client, done)
 Testing
 -------
 You can test this library by running:
+
         npm install pg-large-object
         npm test
 
