@@ -1,6 +1,6 @@
 {
         "name": "pg-large-object",
-        "version": "0.0.0",
+        "version": "0.0.1",
         "author": "Joris van der Wel <joris@jorisvanderwel.com>",
         "description": "Large object support for PostgreSQL clients (node-postgres)",
         "keywords": [
@@ -27,6 +27,9 @@
         
         "main": "./lib",
         "dependencies": {
+        },
+        "peerDependencies": {
+        	"pg": ">=2.7.0"
         },
         "devDependencies": { 
                 "pg": ">=2.11.1",
