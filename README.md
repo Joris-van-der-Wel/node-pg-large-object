@@ -60,7 +60,7 @@ pg.connect(conString, function(err, client, done)
         {
                 if (err)
                 {
-                        done();
+                        done(err);
                         return client.emit('error', err);
                 }
                 
@@ -74,15 +74,14 @@ pg.connect(conString, function(err, client, done)
                 {
                         if (err)
                         {
-                                done();
+                                done(err);
                                 return console.error('Unable to read the given large object', err);
                         }
                 
                         console.log('Streaming a large object with a total size of ', size);
                         stream.on('end', function()
                         {
-                                client.query('COMMIT');
-                                done();
+                                client.query('COMMIT', done);
                         });
                         
                         // Store it as an image
@@ -115,7 +114,7 @@ pg.connect(conString, function(err, client, done)
         {
                 if (err)
                 {
-                        done();
+                        done(err);
                         return client.emit('error', err);
                 }
                 
@@ -126,7 +125,7 @@ pg.connect(conString, function(err, client, done)
                 {
                         if (err)
                         {
-                                done();
+                                done(err);
                                 return console.error('Unable to create a new large object', err);
                         }
                 
@@ -134,8 +133,10 @@ pg.connect(conString, function(err, client, done)
                         console.log('Creating a large object with the oid ', oid);
                         stream.on('finish', function()
                         {
-                                client.query('COMMIT');
-                                done();
+                                // Actual writing of the large object in DB may
+                                // take some time, so one should provide a
+                                // callback to client.query.
+                                client.query('COMMIT', done);
                         });
                         
                         // Upload an image
@@ -168,7 +169,7 @@ pg.connect(conString, function(err, client, done)
         {
                 if (err)
                 {
-                        done();
+                        done(err);
                         return client.emit('error');
                 }
                 
@@ -181,7 +182,7 @@ pg.connect(conString, function(err, client, done)
                 {
                         if (err)
                         {
-                                done();
+                                done(err);
                                 return console.error(
                                         'Unable to open the given large object', 
                                         oid, 
@@ -215,8 +216,7 @@ pg.connect(conString, function(err, client, done)
                         
                         // Done with the object, close it
                         obj.close();
-                        client.query('COMMIT');
-                        done();
+                        client.query('COMMIT', done);
                 });
         });
 });
