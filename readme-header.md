@@ -8,13 +8,15 @@ Installation
 ------------
 
 ```
-npm install pg-large-object
+npm install --save pg-large-object
 ```
 
-You will also need to install the [pg](https://www.npmjs.org/package/pg) library:
+You will also need to install either the [pg](https://www.npmjs.org/package/pg) library, or the [pg-promise](https://www.npmjs.org/pg-promise) library:
 
 ```
-npm install pg
+npm install --save pg
+# or
+npm install --save pg-promise
 ```
 
 Some of the methods in this library require PostgreSQL 9.3 (server) and up:
@@ -33,8 +35,96 @@ chunks (e.g. as a stream), instead of having to load the entire column into memo
 
 Examples
 --------
+The easiest way to use this library is in combination with promises and [pg-promise](https://www.npmjs.org/pg-promise). This
+library exposes a callback style interface (for backwards compatibility) and a promise style
+interface (see [API Documentation](#api-documentation)). All functions that end with "Async" will return a promise
 
-Reading a large object using a stream:
+### Reading a large object using a stream and pg-promise:
+```javascript
+const pgp = require('pg-promise')();
+const {LargeObjectManager} = require('pg-large-object');
+const {createWriteStream} = require('fs');
+
+const db = pgp('postgres://postgres:1234@localhost/postgres');
+
+// When working with Large Objects, always use a transaction
+db.tx(tx => {
+  const man = new LargeObjectManager({pgPromise: tx});
+
+  // A LargeObject oid, probably stored somewhere in one of your own tables.
+  const oid = 123;
+
+  // If you are on a high latency connection and working with
+  // large LargeObjects, you should increase the buffer size.
+  // The buffer should be divisible by 2048 for best performance
+  // (2048 is the default page size in PostgreSQL, see LOBLKSIZE)
+  const bufferSize = 16384;
+
+  return man.openAndReadableStreamAsync(oid, bufferSize)
+  .then(([size, stream]) => {
+    console.log('Streaming a large object with a total size of', size);
+
+    // Store it as an image
+    const fileStream = createWriteStream('my-file.png');
+    stream.pipe(fileStream);
+
+    return new Promise((resolve, reject) => {
+      stream.on('end', resolve);
+      stream.on('error', reject);
+    });
+  });
+})
+.then(() => {
+  console.log('Done!');
+})
+.catch(error => {
+  console.log('Something went horribly wrong!', error);
+});
+```
+
+### Creating a new large object using a stream and pg-promise:
+
+```javascript
+const pgp = require('pg-promise')();
+const {LargeObjectManager} = require('pg-large-object');
+const {createReadStream} = require('fs');
+
+const db = pgp('postgres://postgres:1234@localhost/postgres');
+
+// When working with Large Objects, always use a transaction
+db.tx(tx => {
+  const man = new LargeObjectManager({pgPromise: tx});
+
+  // If you are on a high latency connection and working with
+  // large LargeObjects, you should increase the buffer size.
+  // The buffer should be divisible by 2048 for best performance
+  // (2048 is the default page size in PostgreSQL, see LOBLKSIZE)
+  const bufferSize = 16384;
+
+  return man.createAndWritableStreamAsync(bufferSize)
+  .then(([oid, stream]) => {
+    // The server has generated an oid
+    console.log('Creating a large object with the oid', oid);
+
+    const fileStream = createReadStream('upload-my-file.png');
+    fileStream.pipe(stream);
+
+    return new Promise((resolve, reject) => {
+      stream.on('finish', resolve);
+      stream.on('error', reject);
+    });
+  });
+})
+.then(() => {
+  console.log('Done!');
+})
+.catch(error => {
+  console.log('Something went horribly wrong!', error);
+});
+```
+
+
+### Reading a large object using a stream and callbacks:
 
 ```javascript
 var pg = require('pg');
@@ -48,7 +138,7 @@ pg.connect(conString, function(err, client, done)
     return console.error('could not connect to postgres', err);
   }
 
-  var man = new LargeObjectManager(client);
+  var man = new LargeObjectManager({pg: client});
 
   // When working with Large Objects, always use a transaction
   client.query('BEGIN', function(err, result)
@@ -63,7 +153,9 @@ pg.connect(conString, function(err, client, done)
     var oid = 123;
 
     // If you are on a high latency connection and working with
-    // large LargeObjects, you should increase the buffer size
+    // large LargeObjects, you should increase the buffer size.
+    // The buffer should be divisible by 2048 for best performance
+    // (2048 is the default page size in PostgreSQL, see LOBLKSIZE)
     var bufferSize = 16384;
     man.openAndReadableStream(oid, bufferSize, function(err, size, stream)
     {
@@ -73,7 +165,7 @@ pg.connect(conString, function(err, client, done)
         return console.error('Unable to read the given large object', err);
       }
 
-      console.log('Streaming a large object with a total size of ', size);
+      console.log('Streaming a large object with a total size of', size);
       stream.on('end', function()
       {
         client.query('COMMIT', done);
@@ -88,7 +180,7 @@ pg.connect(conString, function(err, client, done)
 ```
 
 
-Creating a new large object using a stream:
+### Creating a new large object using a stream:
 
 ```javascript
 var pg = require('pg');
@@ -102,7 +194,7 @@ pg.connect(conString, function(err, client, done)
     return console.error('could not connect to postgres', err);
   }
 
-  var man = new LargeObjectManager(client);
+  var man = new LargeObjectManager({pg: client});
 
   // When working with Large Objects, always use a transaction
   client.query('BEGIN', function(err, result)
@@ -114,7 +206,9 @@ pg.connect(conString, function(err, client, done)
     }
 
     // If you are on a high latency connection and working with
-    // large LargeObjects, you should increase the buffer size
+    // large LargeObjects, you should increase the buffer size.
+    // The buffer should be divisible by 2048 for best performance
+    // (2048 is the default page size in PostgreSQL, see LOBLKSIZE)
     var bufferSize = 16384;
     man.createAndWritableStream(bufferSize, function(err, oid, stream)
     {
@@ -125,7 +219,7 @@ pg.connect(conString, function(err, client, done)
       }
 
       // The server has generated an oid
-      console.log('Creating a large object with the oid ', oid);
+      console.log('Creating a large object with the oid', oid);
       stream.on('finish', function()
       {
         // Actual writing of the large object in DB may
@@ -142,7 +236,7 @@ pg.connect(conString, function(err, client, done)
 });
 ```
 
-Using LargeObject methods.
+### Using low level LargeObject functions:
 
 ```javascript
 var pg = require('pg');
@@ -157,7 +251,7 @@ pg.connect(conString, function(err, client, done)
     return console.error('could not connect to postgres', err);
   }
 
-  var man = new LargeObjectManager(client);
+  var man = new LargeObjectManager({pg: client});
 
   // When working with Large Objects, always use a transaction
   client.query('BEGIN', function(err, result)
@@ -231,4 +325,3 @@ You also need to place a large file named "test.jpg" in the test folder.
 
 API Documentation
 -----------------
-Also see: http://www.postgresql.org/docs/9.3/static/largeobjects.html

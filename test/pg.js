@@ -96,7 +96,7 @@ module.exports = {
                 Q.ninvoke(client, "query", "BEGIN")
                 .then(function()
                 {
-                        var man = new pglo.LargeObjectManager(client);
+                        var man = new pglo.LargeObjectManager({pg: client});
                         
                         return man.openAsync(oid, pglo.LargeObjectManager.READ)
                         .then(function(obj)
@@ -241,7 +241,7 @@ module.exports = {
         {
                 var client = this.client;
                 var oid = createdOid;
-                var man = new pglo.LargeObjectManager(client);
+                var man = new pglo.LargeObjectManager({pg: client});
                 
                 test.expect(4);
                 

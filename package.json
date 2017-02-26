@@ -30,10 +30,11 @@
     "jsdoc-to-markdown": "^3.0.0",
     "nodeunit": ">=0.8.6",
     "pg": ">=2.11.1",
+    "pg-promise": "^5.6.1",
     "q": "1.0.1"
   },
   "scripts": {
-    "test": "nodeunit ./test/promiseFromCallback.js ./test/index.js",
+    "test": "nodeunit ./test/promiseFromCallback.js ./test/pg.js ./test/pgPromise.js",
     "predoc": "cp readme-header.md README.md",
     "doc": "jsdoc2md --files \"lib/*.js\" >> README.md"
   }
