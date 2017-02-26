@@ -40,7 +40,6 @@ module.exports = {
         testCreateAndWrite: function(test)
         {
                 var client = this.client;
-                var testCase = this;
                 
                 test.expect(4);
                         
@@ -49,7 +48,7 @@ module.exports = {
                 {
                         var man = new pglo.LargeObjectManager(client);
                         
-                        return Q.ninvoke(man, "create")
+                        return man.createAsync()
                         .then(function(oid)
                         {
                                 createdOid = oid;
@@ -58,16 +57,16 @@ module.exports = {
                                 
                                 console.log("creating a new Large Object with oid: ", oid);
                                 
-                                return Q.ninvoke(man, "open", oid, pglo.LargeObjectManager.WRITE)
+                                return man.openAsync(oid, pglo.LargeObjectManager.WRITE)
                                 .then(function(obj)
                                 {
-                                        return Q.ninvoke(obj, "write", testBuf).then(function()
+                                        return obj.writeAsync(testBuf).then(function()
                                         {
                                                 test.ok(true);
                                         })
                                         .then(function()
                                         {
-                                                return Q.ninvoke(obj, "close");
+                                                return obj.closeAsync();
                                         });
                                 });
                         });
@@ -89,9 +88,7 @@ module.exports = {
         testRead: function(test)
         {
                 var oid = createdOid;
-                
                 var client = this.client;
-                var testCase = this;
                 
                 test.ok(oid);
                 test.expect(19);
@@ -101,10 +98,10 @@ module.exports = {
                 {
                         var man = new pglo.LargeObjectManager(client);
                         
-                        return Q.ninvoke(man, "open", oid, pglo.LargeObjectManager.READ)
+                        return man.openAsync(oid, pglo.LargeObjectManager.READ)
                         .then(function(obj)
                         {
-                                return Q.ninvoke(obj, "read", 2)
+                                return obj.readAsync(2)
                                 .then(function(buf)
                                 {
                                         test.ok(buf);
@@ -114,7 +111,7 @@ module.exports = {
                                 })
                                 .then(function()
                                 {
-                                        return Q.ninvoke(obj, "tell")
+                                        return obj.tellAsync()
                                         .then(function(position)
                                         {
                                                 test.equal(position, 2);
@@ -122,7 +119,7 @@ module.exports = {
                                 })
                                 .then(function()
                                 {
-                                        return Q.ninvoke(obj, "size")
+                                        return obj.sizeAsync()
                                         .then(function(size)
                                         {
                                                 test.equal(size, 8);
@@ -130,7 +127,7 @@ module.exports = {
                                 })
                                 .then(function()
                                 {
-                                        return Q.ninvoke(obj, "tell")
+                                        return obj.tellAsync()
                                         .then(function(position)
                                         {
                                                 test.equal(position, 2, 'calling size() should not change the position');
@@ -138,7 +135,7 @@ module.exports = {
                                 })
                                 .then(function()
                                 {
-                                        return Q.ninvoke(obj, "read", 100)
+                                        return obj.readAsync(100)
                                         .then(function(buf)
                                         {
                                                 test.equal(buf.length, 6);
@@ -150,11 +147,11 @@ module.exports = {
                                 })
                                 .then(function()
                                 {
-                                        return Q.ninvoke(obj, "seek", -2, pglo.LargeObject.SEEK_END);
+                                        return obj.seekAsync(-2, pglo.LargeObject.SEEK_END);
                                 })
                                 .then(function()
                                 {
-                                        return Q.ninvoke(obj, "read", 100)
+                                        return obj.readAsync(100)
                                         .then(function(buf)
                                         {
                                                 test.equal(buf.length, 2);
@@ -164,13 +161,13 @@ module.exports = {
                                 })
                                 .then(function()
                                 {
-                                        return Q.ninvoke(obj, "close");
+                                        return obj.closeAsync();
                                 })
                                 .then(function()
                                 {
                                         createdOid = null;
                                         console.log("unlinking the Large Object with oid: ", oid);
-                                        return Q.ninvoke(man, "unlink", oid);
+                                        return man.unlinkAsync(oid);
                                 })
                         });
                 })
@@ -199,7 +196,7 @@ module.exports = {
                 .then(function()
                 {
                         var man = new pglo.LargeObjectManager(client);
-                        return Q.ninvoke(man, "createAndWritableStream");
+                        return man.createAndWritableStreamAsync();
                 })
                 .then(function(args)
                 {
@@ -254,7 +251,7 @@ module.exports = {
                         return Q.ninvoke(client, "query", "BEGIN")
                         .then(function()
                         {
-                                return Q.ninvoke(man, "openAndReadableStream", oid);
+                                return man.openAndReadableStreamAsync(oid);
                         })
                         .then(function(args)
                         {
@@ -292,7 +289,7 @@ module.exports = {
                         {
                                 createdOid = null;
                                 console.log("unlinking the Large Object with oid: ", oid);
-                                return Q.ninvoke(man, "unlink", oid);
+                                return man.unlinkAsync(oid);
                         })
                         .then(function()
                         {

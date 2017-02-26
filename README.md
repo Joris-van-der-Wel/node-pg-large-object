@@ -245,6 +245,8 @@ Also see: http://www.postgresql.org/docs/9.3/static/largeobjects.html
 All usage of Large Object should take place within a transaction block!
 (BEGIN ... COMMIT)</p>
 </dd>
+<dt><a href="#module_pg-large-object/lib/promiseFromCallback">pg-large-object/lib/promiseFromCallback</a> ⇒ <code>Promise</code></dt>
+<dd></dd>
 <dt><a href="#module_pg-large-object/lib/ReadStream">pg-large-object/lib/ReadStream</a> ⇐ <code>stream.Readable</code></dt>
 <dd></dd>
 <dt><a href="#module_pg-large-object/lib/WriteStream">pg-large-object/lib/WriteStream</a> ⇐ <code>stream.Writable</code></dt>
@@ -294,12 +296,19 @@ Represents an opened large object.
 * [pg-large-object/lib/LargeObject](#module_pg-large-object/lib/LargeObject)
     * _instance_
         * [.close([callback])](#module_pg-large-object/lib/LargeObject+close)
+        * [.closeAsync()](#module_pg-large-object/lib/LargeObject+closeAsync) ⇒ <code>Promise</code>
         * [.read(length, callback)](#module_pg-large-object/lib/LargeObject+read)
-        * [.write(length, [callback])](#module_pg-large-object/lib/LargeObject+write)
+        * [.readAsync(length)](#module_pg-large-object/lib/LargeObject+readAsync) ⇒ <code>Promise.&lt;Buffer&gt;</code>
+        * [.write(buffer, [callback])](#module_pg-large-object/lib/LargeObject+write)
+        * [.writeAsync(buffer)](#module_pg-large-object/lib/LargeObject+writeAsync) ⇒ <code>Promise</code>
         * [.seek(position, ref, [callback])](#module_pg-large-object/lib/LargeObject+seek)
+        * [.seekAsync(position, ref)](#module_pg-large-object/lib/LargeObject+seekAsync) ⇒ <code>Promise.&lt;number&gt;</code>
         * [.tell(callback)](#module_pg-large-object/lib/LargeObject+tell)
+        * [.tellAsync()](#module_pg-large-object/lib/LargeObject+tellAsync) ⇒ <code>Promise.&lt;number&gt;</code>
         * [.size(callback)](#module_pg-large-object/lib/LargeObject+size)
+        * [.sizeAsync()](#module_pg-large-object/lib/LargeObject+sizeAsync) ⇒ <code>Promise.&lt;number&gt;</code>
         * [.truncate(length, [callback])](#module_pg-large-object/lib/LargeObject+truncate)
+        * [.truncateAsync(length)](#module_pg-large-object/lib/LargeObject+truncateAsync) ⇒ <code>Promise</code>
         * [.getReadableStream([bufferSize])](#module_pg-large-object/lib/LargeObject+getReadableStream) ⇒ <code>[pg-large-object/lib/ReadStream](#module_pg-large-object/lib/ReadStream)</code>
         * [.getWritableStream([bufferSize])](#module_pg-large-object/lib/LargeObject+getWritableStream) ⇒ <code>[pg-large-object/lib/WriteStream](#module_pg-large-object/lib/WriteStream)</code>
     * _static_
@@ -327,6 +336,13 @@ Closes this large object.
 | --- | --- |
 | [callback] | <code>[closeCallback](#module_pg-large-object/lib/LargeObject..closeCallback)</code> | 
 
+<a name="module_pg-large-object/lib/LargeObject+closeAsync"></a>
+
+### pg-large-object/lib/LargeObject.closeAsync() ⇒ <code>Promise</code>
+Closes this large object.
+ You should no longer call any methods on this object.
+
+**Kind**: instance method of <code>[pg-large-object/lib/LargeObject](#module_pg-large-object/lib/LargeObject)</code>  
 <a name="module_pg-large-object/lib/LargeObject+read"></a>
 
 ### pg-large-object/lib/LargeObject.read(length, callback)
@@ -339,17 +355,42 @@ Reads some data from the large object.
 | length | <code>Number</code> | How many bytes to read |
 | callback | <code>[readCallback](#module_pg-large-object/lib/LargeObject..readCallback)</code> |  |
 
+<a name="module_pg-large-object/lib/LargeObject+readAsync"></a>
+
+### pg-large-object/lib/LargeObject.readAsync(length) ⇒ <code>Promise.&lt;Buffer&gt;</code>
+Reads some data from the large object.
+
+**Kind**: instance method of <code>[pg-large-object/lib/LargeObject](#module_pg-large-object/lib/LargeObject)</code>  
+**Returns**: <code>Promise.&lt;Buffer&gt;</code> - The binary data that was read.
+         If the length of this buffer is less than the supplied
+         length param, there is no more data to be read.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| length | <code>Number</code> | How many bytes to read |
+
 <a name="module_pg-large-object/lib/LargeObject+write"></a>
 
-### pg-large-object/lib/LargeObject.write(length, [callback])
+### pg-large-object/lib/LargeObject.write(buffer, [callback])
 Writes some data to the large object.
 
 **Kind**: instance method of <code>[pg-large-object/lib/LargeObject](#module_pg-large-object/lib/LargeObject)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| length | <code>Number</code> | How many bytes to read |
+| buffer | <code>Buffer</code> | data to write |
 | [callback] | <code>[writeCallback](#module_pg-large-object/lib/LargeObject..writeCallback)</code> |  |
+
+<a name="module_pg-large-object/lib/LargeObject+writeAsync"></a>
+
+### pg-large-object/lib/LargeObject.writeAsync(buffer) ⇒ <code>Promise</code>
+Writes some data to the large object.
+
+**Kind**: instance method of <code>[pg-large-object/lib/LargeObject](#module_pg-large-object/lib/LargeObject)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| buffer | <code>Buffer</code> | data to write |
 
 <a name="module_pg-large-object/lib/LargeObject+seek"></a>
 
@@ -365,6 +406,20 @@ Beware floating point rounding with values greater than 2^53 (8192 TiB)
 | ref | <code>Number</code> | One of SEEK_SET, SEEK_CUR, SEEK_END |
 | [callback] | <code>[seekCallback](#module_pg-large-object/lib/LargeObject..seekCallback)</code> |  |
 
+<a name="module_pg-large-object/lib/LargeObject+seekAsync"></a>
+
+### pg-large-object/lib/LargeObject.seekAsync(position, ref) ⇒ <code>Promise.&lt;number&gt;</code>
+Sets the position within the large object.
+Beware floating point rounding with values greater than 2^53 (8192 TiB)
+
+**Kind**: instance method of <code>[pg-large-object/lib/LargeObject](#module_pg-large-object/lib/LargeObject)</code>  
+**Returns**: <code>Promise.&lt;number&gt;</code> - The new position  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| position | <code>Number</code> |  |
+| ref | <code>Number</code> | One of SEEK_SET, SEEK_CUR, SEEK_END |
+
 <a name="module_pg-large-object/lib/LargeObject+tell"></a>
 
 ### pg-large-object/lib/LargeObject.tell(callback)
@@ -377,6 +432,13 @@ Beware floating point rounding with values greater than 2^53 (8192 TiB)
 | --- | --- |
 | callback | <code>[tellCallback](#module_pg-large-object/lib/LargeObject..tellCallback)</code> | 
 
+<a name="module_pg-large-object/lib/LargeObject+tellAsync"></a>
+
+### pg-large-object/lib/LargeObject.tellAsync() ⇒ <code>Promise.&lt;number&gt;</code>
+Retrieves the current position within the large object.
+Beware floating point rounding with values greater than 2^53 (8192 TiB)
+
+**Kind**: instance method of <code>[pg-large-object/lib/LargeObject](#module_pg-large-object/lib/LargeObject)</code>  
 <a name="module_pg-large-object/lib/LargeObject+size"></a>
 
 ### pg-large-object/lib/LargeObject.size(callback)
@@ -388,6 +450,12 @@ Find the total size of the large object.
 | --- | --- |
 | callback | <code>[sizeCallback](#module_pg-large-object/lib/LargeObject..sizeCallback)</code> | 
 
+<a name="module_pg-large-object/lib/LargeObject+sizeAsync"></a>
+
+### pg-large-object/lib/LargeObject.sizeAsync() ⇒ <code>Promise.&lt;number&gt;</code>
+Find the total size of the large object.
+
+**Kind**: instance method of <code>[pg-large-object/lib/LargeObject](#module_pg-large-object/lib/LargeObject)</code>  
 <a name="module_pg-large-object/lib/LargeObject+truncate"></a>
 
 ### pg-large-object/lib/LargeObject.truncate(length, [callback])
@@ -402,6 +470,20 @@ bytes.  This method does not modify the current file offset.
 | --- | --- |
 | length | <code>Number</code> | 
 | [callback] | <code>[truncateCallback](#module_pg-large-object/lib/LargeObject..truncateCallback)</code> | 
+
+<a name="module_pg-large-object/lib/LargeObject+truncateAsync"></a>
+
+### pg-large-object/lib/LargeObject.truncateAsync(length) ⇒ <code>Promise</code>
+Truncates the large object to the given length in bytes.
+If the number of bytes is larger than the current large
+object length, the large object will be filled with zero
+bytes.  This method does not modify the current file offset.
+
+**Kind**: instance method of <code>[pg-large-object/lib/LargeObject](#module_pg-large-object/lib/LargeObject)</code>  
+
+| Param | Type |
+| --- | --- |
+| length | <code>Number</code> | 
 
 <a name="module_pg-large-object/lib/LargeObject+getReadableStream"></a>
 
@@ -452,7 +534,7 @@ A seek from the end of a object
 
 | Param | Type | Description |
 | --- | --- | --- |
-| error | <code>Error</code> | If set, an error occured. |
+| error | <code>Error</code> | If set, an error occurred. |
 
 <a name="module_pg-large-object/lib/LargeObject..readCallback"></a>
 
@@ -461,8 +543,8 @@ A seek from the end of a object
 
 | Param | Type | Description |
 | --- | --- | --- |
-| error | <code>Error</code> | If set, an error occured. |
-| data | <code>Buffer</code> | The binary data that was read.        If the lenght of this buffer is less than the supplied        length param, there is no more data to be read. |
+| error | <code>Error</code> | If set, an error occurred. |
+| data | <code>Buffer</code> | The binary data that was read.        If the length of this buffer is less than the supplied        length param, there is no more data to be read. |
 
 <a name="module_pg-large-object/lib/LargeObject..writeCallback"></a>
 
@@ -471,7 +553,7 @@ A seek from the end of a object
 
 | Param | Type | Description |
 | --- | --- | --- |
-| error | <code>Error</code> | If set, an error occured. |
+| error | <code>Error</code> | If set, an error occurred. |
 
 <a name="module_pg-large-object/lib/LargeObject..seekCallback"></a>
 
@@ -480,7 +562,7 @@ A seek from the end of a object
 
 | Param | Type | Description |
 | --- | --- | --- |
-| error | <code>Error</code> | If set, an error occured. |
+| error | <code>Error</code> | If set, an error occurred. |
 | position | <code>Number</code> | The new position |
 
 <a name="module_pg-large-object/lib/LargeObject..tellCallback"></a>
@@ -490,7 +572,7 @@ A seek from the end of a object
 
 | Param | Type | Description |
 | --- | --- | --- |
-| error | <code>Error</code> | If set, an error occured. |
+| error | <code>Error</code> | If set, an error occurred. |
 | position | <code>Number</code> | The position |
 
 <a name="module_pg-large-object/lib/LargeObject..sizeCallback"></a>
@@ -500,7 +582,7 @@ A seek from the end of a object
 
 | Param | Type | Description |
 | --- | --- | --- |
-| error | <code>Error</code> | If set, an error occured. |
+| error | <code>Error</code> | If set, an error occurred. |
 | size | <code>Number</code> | Object size in bytes |
 
 <a name="module_pg-large-object/lib/LargeObject..truncateCallback"></a>
@@ -510,7 +592,7 @@ A seek from the end of a object
 
 | Param | Type | Description |
 | --- | --- | --- |
-| error | <code>Error</code> | If set, an error occured. |
+| error | <code>Error</code> | If set, an error occurred. |
 
 <a name="module_pg-large-object/lib/LargeObjectManager"></a>
 
@@ -532,10 +614,15 @@ new LargeObjectManager(client)
 * [pg-large-object/lib/LargeObjectManager](#module_pg-large-object/lib/LargeObjectManager)
     * _instance_
         * [.open(oid, mode, callback)](#module_pg-large-object/lib/LargeObjectManager+open)
+        * [.openAsync(oid, mode)](#module_pg-large-object/lib/LargeObjectManager+openAsync) ⇒ <code>[Promise.&lt;pg-large-object/lib/LargeObject&gt;](#module_pg-large-object/lib/LargeObject)</code>
         * [.create(callback)](#module_pg-large-object/lib/LargeObjectManager+create)
-        * [.unlink([callback])](#module_pg-large-object/lib/LargeObjectManager+unlink)
+        * [.createAsync()](#module_pg-large-object/lib/LargeObjectManager+createAsync) ⇒ <code>Promise.&lt;number&gt;</code>
+        * [.unlink(oid, [callback])](#module_pg-large-object/lib/LargeObjectManager+unlink)
+        * [.unlinkAsync(oid)](#module_pg-large-object/lib/LargeObjectManager+unlinkAsync) ⇒ <code>Promise</code>
         * [.openAndReadableStream(oid, [bufferSize], callback)](#module_pg-large-object/lib/LargeObjectManager+openAndReadableStream)
+        * [.openAndReadableStreamAsync(oid, [bufferSize])](#module_pg-large-object/lib/LargeObjectManager+openAndReadableStreamAsync) ⇒ <code>Promise.&lt;Array&gt;</code>
         * [.createAndWritableStream([bufferSize], [callback])](#module_pg-large-object/lib/LargeObjectManager+createAndWritableStream)
+        * [.createAndWritableStreamAsync([bufferSize])](#module_pg-large-object/lib/LargeObjectManager+createAndWritableStreamAsync) ⇒ <code>promise.&lt;Array&gt;</code>
     * _static_
         * [.WRITE](#module_pg-large-object/lib/LargeObjectManager.WRITE) : <code>Number</code>
         * [.READ](#module_pg-large-object/lib/LargeObjectManager.READ) : <code>Number</code>
@@ -567,6 +654,25 @@ writes of the current transaction.
 | mode | <code>Number</code> | One of WRITE, READ, or READWRITE |
 | callback | <code>[openCallback](#module_pg-large-object/lib/LargeObjectManager..openCallback)</code> |  |
 
+<a name="module_pg-large-object/lib/LargeObjectManager+openAsync"></a>
+
+### pg-large-object/lib/LargeObjectManager.openAsync(oid, mode) ⇒ <code>[Promise.&lt;pg-large-object/lib/LargeObject&gt;](#module_pg-large-object/lib/LargeObject)</code>
+Open an existing large object, based on its OID.
+In mode READ, the data read from it will reflect the
+contents of the large object at the time of the transaction
+snapshot that was active when open was executed,
+regardless of later writes by this or other transactions.
+If opened using WRITE (or READWRITE), data read will reflect
+all writes of other committed transactions as well as
+writes of the current transaction.
+
+**Kind**: instance method of <code>[pg-large-object/lib/LargeObjectManager](#module_pg-large-object/lib/LargeObjectManager)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| oid | <code>Number</code> |  |
+| mode | <code>Number</code> | One of WRITE, READ, or READWRITE |
+
 <a name="module_pg-large-object/lib/LargeObjectManager+create"></a>
 
 ### pg-large-object/lib/LargeObjectManager.create(callback)
@@ -579,16 +685,36 @@ After which you can open() it.
 | --- | --- |
 | callback | <code>[createCallback](#module_pg-large-object/lib/LargeObjectManager..createCallback)</code> | 
 
+<a name="module_pg-large-object/lib/LargeObjectManager+createAsync"></a>
+
+### pg-large-object/lib/LargeObjectManager.createAsync() ⇒ <code>Promise.&lt;number&gt;</code>
+Creates a large object, returning its OID.
+After which you can open() it.
+
+**Kind**: instance method of <code>[pg-large-object/lib/LargeObjectManager](#module_pg-large-object/lib/LargeObjectManager)</code>  
+**Returns**: <code>Promise.&lt;number&gt;</code> - oid  
 <a name="module_pg-large-object/lib/LargeObjectManager+unlink"></a>
 
-### pg-large-object/lib/LargeObjectManager.unlink([callback])
-Unlinks (deletes) large object
+### pg-large-object/lib/LargeObjectManager.unlink(oid, [callback])
+Unlinks (deletes) a large object
 
 **Kind**: instance method of <code>[pg-large-object/lib/LargeObjectManager](#module_pg-large-object/lib/LargeObjectManager)</code>  
 
 | Param | Type |
 | --- | --- |
+| oid | <code>number</code> | 
 | [callback] | <code>[unlinkCallback](#module_pg-large-object/lib/LargeObjectManager..unlinkCallback)</code> | 
+
+<a name="module_pg-large-object/lib/LargeObjectManager+unlinkAsync"></a>
+
+### pg-large-object/lib/LargeObjectManager.unlinkAsync(oid) ⇒ <code>Promise</code>
+Unlinks (deletes) a large object
+
+**Kind**: instance method of <code>[pg-large-object/lib/LargeObjectManager](#module_pg-large-object/lib/LargeObjectManager)</code>  
+
+| Param | Type |
+| --- | --- |
+| oid | <code>number</code> | 
 
 <a name="module_pg-large-object/lib/LargeObjectManager+openAndReadableStream"></a>
 
@@ -604,6 +730,20 @@ Only call this within a transaction block.
 | [bufferSize] | <code>Number</code> | <code>16384</code> | 
 | callback | <code>[openAndReadableStreamCallback](#module_pg-large-object/lib/LargeObjectManager..openAndReadableStreamCallback)</code> |  | 
 
+<a name="module_pg-large-object/lib/LargeObjectManager+openAndReadableStreamAsync"></a>
+
+### pg-large-object/lib/LargeObjectManager.openAndReadableStreamAsync(oid, [bufferSize]) ⇒ <code>Promise.&lt;Array&gt;</code>
+Open a large object, return a stream and close the object when done streaming.
+Only call this within a transaction block.
+
+**Kind**: instance method of <code>[pg-large-object/lib/LargeObjectManager](#module_pg-large-object/lib/LargeObjectManager)</code>  
+**Returns**: <code>Promise.&lt;Array&gt;</code> - The total size and a ReadStream  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| oid | <code>Number</code> |  | 
+| [bufferSize] | <code>Number</code> | <code>16384</code> | 
+
 <a name="module_pg-large-object/lib/LargeObjectManager+createAndWritableStream"></a>
 
 ### pg-large-object/lib/LargeObjectManager.createAndWritableStream([bufferSize], [callback])
@@ -616,6 +756,19 @@ Only call this within a transaction block.
 | --- | --- | --- |
 | [bufferSize] | <code>Number</code> | <code>16384</code> | 
 | [callback] | <code>[createAndWritableStreamCallback](#module_pg-large-object/lib/LargeObjectManager..createAndWritableStreamCallback)</code> |  | 
+
+<a name="module_pg-large-object/lib/LargeObjectManager+createAndWritableStreamAsync"></a>
+
+### pg-large-object/lib/LargeObjectManager.createAndWritableStreamAsync([bufferSize]) ⇒ <code>promise.&lt;Array&gt;</code>
+Create and open a large object, return a stream and close the object when done streaming.
+Only call this within a transaction block.
+
+**Kind**: instance method of <code>[pg-large-object/lib/LargeObjectManager](#module_pg-large-object/lib/LargeObjectManager)</code>  
+**Returns**: <code>promise.&lt;Array&gt;</code> - The oid and a WriteStream  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [bufferSize] | <code>Number</code> | <code>16384</code> | 
 
 <a name="module_pg-large-object/lib/LargeObjectManager.WRITE"></a>
 
@@ -636,7 +789,7 @@ Only call this within a transaction block.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| error | <code>Error</code> | If set, an error occured. |
+| error | <code>Error</code> | If set, an error occurred. |
 | result | <code>[pg-large-object/lib/LargeObject](#module_pg-large-object/lib/LargeObject)</code> |  |
 
 <a name="module_pg-large-object/lib/LargeObjectManager..createCallback"></a>
@@ -646,7 +799,7 @@ Only call this within a transaction block.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| error | <code>Error</code> | If set, an error occured. |
+| error | <code>Error</code> | If set, an error occurred. |
 | oid | <code>Number</code> |  |
 
 <a name="module_pg-large-object/lib/LargeObjectManager..unlinkCallback"></a>
@@ -656,7 +809,7 @@ Only call this within a transaction block.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| error | <code>Error</code> | If set, an error occured. |
+| error | <code>Error</code> | If set, an error occurred. |
 
 <a name="module_pg-large-object/lib/LargeObjectManager..openAndReadableStreamCallback"></a>
 
@@ -665,7 +818,7 @@ Only call this within a transaction block.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| error | <code>Error</code> | If set, an error occured. |
+| error | <code>Error</code> | If set, an error occurred. |
 | size | <code>Number</code> | The total size of the large object |
 | stream | <code>[pg-large-object/lib/ReadStream](#module_pg-large-object/lib/ReadStream)</code> |  |
 
@@ -676,9 +829,19 @@ Only call this within a transaction block.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| error | <code>Error</code> | If set, an error occured. |
+| error | <code>Error</code> | If set, an error occurred. |
 | oid | <code>Number</code> |  |
 | stream | <code>[pg-large-object/lib/WriteStream](#module_pg-large-object/lib/WriteStream)</code> |  |
+
+<a name="module_pg-large-object/lib/promiseFromCallback"></a>
+
+## pg-large-object/lib/promiseFromCallback ⇒ <code>Promise</code>
+
+| Param | Type |
+| --- | --- |
+| fn | <code>function</code> | 
+| self | <code>object</code> | 
+| [options] | <code>object</code> | 
 
 <a name="module_pg-large-object/lib/ReadStream"></a>
 

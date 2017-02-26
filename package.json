@@ -33,7 +33,7 @@
     "q": "1.0.1"
   },
   "scripts": {
-    "test": "nodeunit ./test/index.js",
+    "test": "nodeunit ./test/promiseFromCallback.js ./test/index.js",
     "predoc": "cp readme-header.md README.md",
     "doc": "jsdoc2md --files \"lib/*.js\" >> README.md"
   }
