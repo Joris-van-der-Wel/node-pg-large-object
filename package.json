@@ -27,11 +27,14 @@
     "pg": ">=2.7.0"
   },
   "devDependencies": {
-    "pg": ">=2.11.1",
+    "jsdoc-to-markdown": "^3.0.0",
     "nodeunit": ">=0.8.6",
+    "pg": ">=2.11.1",
     "q": "1.0.1"
   },
   "scripts": {
-    "test": "nodeunit ./test/index.js"
+    "test": "nodeunit ./test/index.js",
+    "predoc": "cp readme-header.md README.md",
+    "doc": "jsdoc2md --files \"lib/*.js\" >> README.md"
   }
 }
